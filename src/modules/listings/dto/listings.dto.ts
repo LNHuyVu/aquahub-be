@@ -79,9 +79,28 @@ export class CreateListingDto {
   @IsOptional()
   images?: string[];
 
+  @IsArray()
+  @IsOptional()
+  imageData?: Array<{
+    url: string;
+    thumbnailUrl?: string;
+    width?: number;
+    height?: number;
+    caption?: string;
+  }>;
+
   @IsString()
   @IsOptional()
   videoUrl?: string;
+
+  @IsArray()
+  @IsOptional()
+  videosData?: Array<{
+    url: string;
+    thumbnailUrl?: string;
+    title?: string;
+    duration?: number;
+  }>;
 
   @IsString()
   @IsNotEmpty()
@@ -100,8 +119,8 @@ export class CreateListingDto {
   province: string;
 
   @IsString()
-  @IsNotEmpty()
-  district: string;
+  @IsOptional()
+  district?: string;
 
   @IsString()
   @IsOptional()
@@ -126,6 +145,27 @@ export class CreateListingDto {
   @IsString()
   @IsOptional()
   categoryId?: string;
+
+  // Shopee Affiliate Product Info (Admin only)
+  @IsString()
+  @IsOptional()
+  shopeeProductUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  shopeeProductName?: string;
+
+  @IsNumber()
+  @IsOptional()
+  shopeePrice?: number;
+
+  @IsString()
+  @IsOptional()
+  shopeeImageUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  shopeeCommissionRate?: string;
 }
 
 export class UpdateListingDto {
@@ -158,9 +198,29 @@ export class UpdateListingDto {
   @IsOptional()
   images?: string[];
 
+  @IsArray()
+  @IsOptional()
+  imageData?: Array<{
+    url: string;
+    thumbnailUrl?: string;
+    width?: number;
+    height?: number;
+    caption?: string;
+  }>;
+
   @IsString()
   @IsOptional()
   videoUrl?: string;
+
+  @IsArray()
+  @IsOptional()
+  videosData?: Array<{
+    url: string;
+    thumbnailUrl?: string;
+    title?: string;
+    duration?: number;
+  }>;
+
 
   @IsString()
   @IsOptional()
@@ -205,6 +265,27 @@ export class UpdateListingDto {
   @IsString()
   @IsOptional()
   categoryId?: string;
+
+  // Shopee Affiliate Product Info
+  @IsString()
+  @IsOptional()
+  shopeeProductUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  shopeeProductName?: string;
+
+  @IsNumber()
+  @IsOptional()
+  shopeePrice?: number;
+
+  @IsString()
+  @IsOptional()
+  shopeeImageUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  shopeeCommissionRate?: string;
 }
 
 export class QueryListingDto {
@@ -212,7 +293,7 @@ export class QueryListingDto {
   page?: number;
 
   @IsOptional()
-  limit?: number;
+  limit?: number = 24;
 
   @IsString()
   @IsOptional()
@@ -230,9 +311,14 @@ export class QueryListingDto {
   @IsOptional()
   province?: string;
 
+  @IsString()
+  @IsOptional()
+  userId?: string;
+
   @IsEnum(ListingStatus)
   @IsOptional()
   status?: ListingStatus;
+
 
   @IsEnum(ListingCondition)
   @IsOptional()
@@ -244,6 +330,9 @@ export class QueryListingDto {
   @IsOptional()
   maxPrice?: number;
 
+  @IsOptional()
+  hasVideo?: boolean;
+
   @IsString()
   @IsOptional()
   sortBy?: 'createdAt' | 'price' | 'views' | 'likesCount';
@@ -252,6 +341,8 @@ export class QueryListingDto {
   @IsOptional()
   sortOrder?: 'ASC' | 'DESC';
 }
+
+export type QueryListingsDto = QueryListingDto;
 
 export class CreateListingCommentDto {
   @IsString()

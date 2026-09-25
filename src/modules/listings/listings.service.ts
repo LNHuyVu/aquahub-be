@@ -14,6 +14,7 @@ import {
   ListingReport,
   ListingStatus,
 } from './entities/listing.entity';
+import { FishCategory } from '../fish/entities/fish.entity';
 import {
   CreateListingDto,
   UpdateListingDto,
@@ -24,16 +25,8 @@ import {
   CreateListingReportDto,
 } from './dto/listings.dto';
 
-function generateSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[đĐ]/g, 'd')
-    .replace(/[^a-z0-9]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-}
+import { applyFuzzySearch } from '../../common/utils/fuzzy-search';
+import { createSlug } from '../../common/utils/slug';
 
 @Injectable()
 export class ListingsService {
@@ -48,12 +41,42 @@ export class ListingsService {
     private likeRepo: Repository<ListingLike>,
     @InjectRepository(ListingReport)
     private reportRepo: Repository<ListingReport>,
+    @InjectRepository(FishCategory)
+    private fishCategoryRepo: Repository<FishCategory>,
   ) {}
 
   // ----------------------------------------------------
   // CATEGORIES CRUD
   // ----------------------------------------------------
   async findAllCategories() {
+    const fishCats = await this.fishCategoryRepo.find({
+      order: { order: 'ASC', name: 'ASC' },
+    });
+
+    if (fishCats.length > 0) {
+      for (const fc of fishCats) {
+        let lc = await this.categoryRepo.findOne({ where: [{ id: fc.id }, { slug: fc.slug }] });
+        if (!lc) {
+          lc = this.categoryRepo.create({
+            id: fc.id,
+            name: fc.name,
+            slug: fc.slug,
+            description: fc.description,
+            icon: fc.icon,
+            order: fc.order,
+          });
+          await this.categoryRepo.save(lc);
+        } else if (lc.name !== fc.name || lc.slug !== fc.slug || lc.icon !== fc.icon) {
+          lc.name = fc.name;
+          lc.slug = fc.slug;
+          lc.description = fc.description;
+          lc.icon = fc.icon;
+          lc.order = fc.order;
+          await this.categoryRepo.save(lc);
+        }
+      }
+    }
+
     return this.categoryRepo.find({
       order: { order: 'ASC', createdAt: 'DESC' },
       relations: { listings: true },
@@ -61,7 +84,7 @@ export class ListingsService {
   }
 
   async createCategory(dto: CreateListingCategoryDto) {
-    const slug = dto.slug || generateSlug(dto.name);
+    const slug = dto.slug || createSlug(dto.name, 'danh-muc');
     const exists = await this.categoryRepo.findOne({ where: { slug } });
     if (exists) {
       throw new BadRequestException('Danh mục đã tồn tại với slug này');
@@ -74,7 +97,7 @@ export class ListingsService {
     const cat = await this.categoryRepo.findOne({ where: { id } });
     if (!cat) throw new NotFoundException('Không tìm thấy danh mục');
     if (dto.name && !dto.slug) {
-      dto.slug = generateSlug(dto.name);
+      dto.slug = createSlug(dto.name, 'danh-muc');
     }
     Object.assign(cat, dto);
     return this.categoryRepo.save(cat);
@@ -92,7 +115,7 @@ export class ListingsService {
   // ----------------------------------------------------
   async findAll(query: QueryListingDto) {
     const page = Number(query.page) || 1;
-    const limit = Number(query.limit) || 12;
+    const limit = Number(query.limit) || 24;
     const skip = (page - 1) * limit;
 
     const qb = this.listingRepo
@@ -110,10 +133,13 @@ export class ListingsService {
     }
 
     if (query.search) {
-      qb.andWhere(
-        '(LOWER(listing.title) LIKE LOWER(:search) OR LOWER(listing.description) LIKE LOWER(:search) OR LOWER(listing.province) LIKE LOWER(:search))',
-        { search: `%${query.search}%` },
-      );
+      applyFuzzySearch(qb, query.search, [
+        'listing.title',
+        'listing.description',
+        'listing.province',
+        'category.name',
+        'user.displayName',
+      ]);
     }
 
     if (query.categoryId) {
@@ -128,9 +154,14 @@ export class ListingsService {
       qb.andWhere('listing.province = :province', { province: query.province });
     }
 
+    if (query.userId) {
+      qb.andWhere('listing.userId = :userId', { userId: query.userId });
+    }
+
     if (query.condition) {
       qb.andWhere('listing.condition = :condition', { condition: query.condition });
     }
+
 
     if (query.minPrice !== undefined && query.minPrice !== null) {
       qb.andWhere('listing.price >= :minPrice', { minPrice: Number(query.minPrice) });
@@ -139,6 +170,11 @@ export class ListingsService {
     if (query.maxPrice !== undefined && query.maxPrice !== null) {
       qb.andWhere('listing.price <= :maxPrice', { maxPrice: Number(query.maxPrice) });
     }
+
+    if (query.hasVideo) {
+      qb.andWhere('(listing.videoUrl IS NOT NULL OR listing.videosData IS NOT NULL)');
+    }
+
 
     const sortBy = query.sortBy || 'createdAt';
     const sortOrder = query.sortOrder || 'DESC';
@@ -204,7 +240,7 @@ export class ListingsService {
   // LISTING MUTATIONS (USER)
   // ----------------------------------------------------
   async createListing(userId: string, dto: CreateListingDto) {
-    const baseSlug = generateSlug(dto.title);
+    const baseSlug = createSlug(dto.title, 'tin-dang');
     const uniqueSuffix = Date.now().toString(36);
     const slug = `${baseSlug}-${uniqueSuffix}`;
 
@@ -227,7 +263,7 @@ export class ListingsService {
     }
 
     if (dto.title && dto.title !== listing.title) {
-      const baseSlug = generateSlug(dto.title);
+      const baseSlug = createSlug(dto.title, 'tin-dang');
       listing.slug = `${baseSlug}-${Date.now().toString(36)}`;
     }
 
@@ -336,10 +372,12 @@ export class ListingsService {
     }
 
     if (query.search) {
-      qb.andWhere(
-        '(LOWER(listing.title) LIKE LOWER(:search) OR LOWER(user.name) LIKE LOWER(:search))',
-        { search: `%${query.search}%` },
-      );
+      applyFuzzySearch(qb, query.search, [
+        'listing.title',
+        'user.displayName',
+        'user.username',
+        'user.email',
+      ]);
     }
 
     qb.orderBy('listing.createdAt', 'DESC');

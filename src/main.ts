@@ -11,6 +11,10 @@ import { existsSync, mkdirSync } from 'fs';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Increase body parser payload size limit for importing large JSON datasets
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
   // Serve uploaded files statically
   const uploadDir = join(process.cwd(), 'uploads');
   if (!existsSync(uploadDir)) {

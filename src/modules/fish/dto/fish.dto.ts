@@ -16,6 +16,10 @@ export class QueryFishDto {
   difficulty?: DifficultyLevel;
 
   @IsOptional()
+  @IsEnum(SwimLevel)
+  swimLevel?: SwimLevel;
+
+  @IsOptional()
   @Type(() => Number)
   @IsNumber()
   page?: number = 1;
@@ -23,7 +27,7 @@ export class QueryFishDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  limit?: number = 12;
+  limit?: number = 24;
 
   @IsOptional()
   @IsString()
@@ -47,9 +51,25 @@ export class CreateFishDto {
   @IsString()
   scientificName?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'Danh mục cá không được để trống' })
-  categoryId: string;
+  categoryId?: string;
+
+  @IsOptional()
+  @IsString()
+  categoryName?: string;
+
+  @IsOptional()
+  @IsArray()
+  categoryIds?: string[];
+
+  @IsOptional()
+  @IsArray()
+  categoryNames?: string[];
+
+  @IsOptional()
+  @IsArray()
+  categorySlugs?: string[];
 
   @IsOptional()
   @IsArray()

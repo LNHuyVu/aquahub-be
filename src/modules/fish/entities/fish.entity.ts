@@ -80,12 +80,18 @@ export class Fish {
   @Column('simple-array', { nullable: true })
   images: string[];
 
-  @Column()
+  @Column({ nullable: true })
   categoryId: string;
 
-  @ManyToOne(() => FishCategory, { onDelete: 'SET NULL' })
+  @ManyToOne(() => FishCategory, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'categoryId' })
   category: FishCategory;
+
+  @Column('simple-array', { nullable: true })
+  categoryIds: string[];
+
+  @Column('simple-array', { nullable: true })
+  categorySlugs: string[];
 
   @Column({ type: 'float', nullable: true })
   sizeMin: number;

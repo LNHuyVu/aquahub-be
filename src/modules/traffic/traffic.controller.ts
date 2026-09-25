@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Query, Req, UseGuards } from '@nestjs/common';
 import { TrafficService } from './traffic.service';
 import { RecordTrafficDto } from './dto/traffic.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Public, Roles } from '../../common/decorators/public.decorator';
 import { Role } from '../../common/enums/role.enum';
 
 @Controller('traffic')
@@ -11,6 +11,7 @@ export class TrafficController {
   constructor(private readonly trafficService: TrafficService) {}
 
   // Public endpoint for frontend to ping page visits
+  @Public()
   @Post('track')
   async trackVisit(@Body() dto: RecordTrafficDto, @Req() req: any) {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';

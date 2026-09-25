@@ -14,6 +14,7 @@ import { AdsModule } from './modules/ads/ads.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { ListingsModule } from './modules/listings/listings.module';
 import { TrafficModule } from './modules/traffic/traffic.module';
+import { MessagesModule } from './modules/messages/messages.module';
 
 @Module({
   imports: [
@@ -38,6 +39,8 @@ import { TrafficModule } from './modules/traffic/traffic.module';
     SettingsModule,
     ListingsModule,
     TrafficModule,
+    MessagesModule,
   ],
 })
 export class AppModule {}
+

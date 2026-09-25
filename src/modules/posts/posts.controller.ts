@@ -1,14 +1,51 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Body, Param, Query, UseGuards, Delete } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import { QueryPostDto, CreatePostDto, CreateCommentDto, CreateReportDto } from './dto/posts.dto';
-import { Public } from '../../common/decorators/public.decorator';
+import {
+  QueryPostDto,
+  CreatePostDto,
+  UpdatePostDto,
+  CreatePostCategoryDto,
+  UpdatePostCategoryDto,
+  CreateCommentDto,
+  CreateReportDto,
+  AdminBoostLikesDto,
+} from './dto/posts.dto';
+import { Public, Roles } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
 
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
+
+  @Public()
+  @Get('categories')
+  async getCategories() {
+    return this.postsService.getCategories();
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @Post('categories')
+  async createCategory(@Body() dto: CreatePostCategoryDto) {
+    return this.postsService.createCategory(dto);
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @Put('categories/:id')
+  async updateCategory(@Param('id') id: string, @Body() dto: UpdatePostCategoryDto) {
+    return this.postsService.updateCategory(id, dto);
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @Delete('categories/:id')
+  async deleteCategory(@Param('id') id: string) {
+    return this.postsService.deleteCategory(id);
+  }
 
   @Public()
   @Get()
@@ -34,6 +71,25 @@ export class PostsController {
     @Body() dto: CreatePostDto,
   ) {
     return this.postsService.createPost(userId, dto);
+  }
+
+  @Put(':id')
+  async updatePost(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: string,
+    @Body() dto: UpdatePostDto,
+  ) {
+    return this.postsService.updatePost(id, userId, userRole, dto);
+  }
+
+  @Put(':id/toggle-status')
+  async toggleStatus(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: string,
+  ) {
+    return this.postsService.toggleStatus(id, userId, userRole);
   }
 
   @Post(':id/like')
@@ -74,5 +130,24 @@ export class PostsController {
     @Body() dto: CreateReportDto,
   ) {
     return this.postsService.reportPost(userId, postId, dto);
+  }
+
+  @Roles('ADMIN')
+  @UseGuards(RolesGuard)
+  @Post(':id/boost-likes')
+  async boostLikes(
+    @Param('id') postId: string,
+    @Body() dto: AdminBoostLikesDto,
+  ) {
+    return this.postsService.boostLikes(postId, dto.count);
+  }
+
+  @Delete(':id')
+  async deletePost(
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: string,
+    @Param('id') id: string,
+  ) {
+    return this.postsService.deletePost(userId, userRole, id);
   }
 }

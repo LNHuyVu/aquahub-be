@@ -4,7 +4,9 @@ import { Repository } from 'typeorm';
 import { Question, Answer } from './entities/question.entity';
 import { CreateQuestionDto, CreateAnswerDto } from './dto/questions.dto';
 
+import { applyFuzzySearch } from '../../common/utils/fuzzy-search';
 import { User } from '../users/entities/user.entity';
+import { createSlug } from '../../common/utils/slug';
 
 @Injectable()
 export class QuestionsService {
@@ -17,7 +19,7 @@ export class QuestionsService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async findAll(page = 1, limit = 10, search?: string) {
+  async findAll(page = 1, limit = 24, search?: string) {
     const skip = (page - 1) * limit;
     const queryBuilder = this.questionRepository
       .createQueryBuilder('question')
@@ -27,10 +29,12 @@ export class QuestionsService {
       .take(limit);
 
     if (search) {
-      queryBuilder.andWhere(
-        '(LOWER(question.title) LIKE LOWER(:search) OR LOWER(question.content) LIKE LOWER(:search))',
-        { search: `%${search}%` },
-      );
+      applyFuzzySearch(queryBuilder, search, [
+        'question.title',
+        'question.content',
+        'author.displayName',
+        'author.username',
+      ]);
     }
 
     const [items, total] = await queryBuilder.getManyAndCount();
@@ -47,8 +51,14 @@ export class QuestionsService {
   }
 
   async findBySlug(slug: string) {
+    const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(slug);
+    const whereConditions: any[] = [{ slug }];
+    if (isUuid) {
+      whereConditions.push({ id: slug });
+    }
+
     const question = await this.questionRepository.findOne({
-      where: { slug },
+      where: whereConditions,
       relations: { author: true },
     });
 
@@ -72,13 +82,8 @@ export class QuestionsService {
   }
 
   async createQuestion(userId: string, dto: CreateQuestionDto) {
-    const slug = dto.title
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[đĐ]/g, 'd')
-      .replace(/[^a-z0-9]/g, '-')
-      .replace(/-+/g, '-') + '-' + Date.now().toString().slice(-4);
+    const baseSlug = createSlug(dto.title, 'cau-hoi');
+    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
 
     const question = this.questionRepository.create({
       ...dto,
@@ -203,5 +208,20 @@ export class QuestionsService {
     await this.questionRepository.save(question);
 
     return { success: true };
+  }
+
+  async deleteQuestion(userId: string, userRole: string, questionId: string) {
+    const question = await this.questionRepository.findOne({ where: { id: questionId } });
+    if (!question) throw new NotFoundException('Câu hỏi không tồn tại');
+
+    if (question.authorId !== userId && userRole !== 'ADMIN') {
+      throw new ForbiddenException('Bạn không có quyền xóa câu hỏi này');
+    }
+
+    // Delete associated answers first
+    await this.answerRepository.delete({ questionId });
+    await this.questionRepository.remove(question);
+
+    return { success: true, message: 'Đã xóa câu hỏi thành công' };
   }
 }

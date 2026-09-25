@@ -101,8 +101,25 @@ export class Listing {
   @Index()
   status: ListingStatus;
 
+  @Column({ type: 'json', nullable: true })
+  imageData: Array<{
+    url: string;
+    thumbnailUrl?: string;
+    width?: number;
+    height?: number;
+    caption?: string;
+  }>;
+
   @Column({ type: 'simple-array', nullable: true })
   images: string[];
+
+  @Column({ type: 'json', nullable: true })
+  videosData: Array<{
+    url: string;
+    thumbnailUrl?: string;
+    title?: string;
+    duration?: number;
+  }>;
 
   @Column({ nullable: true })
   videoUrl: string;
@@ -121,7 +138,7 @@ export class Listing {
   @Column()
   province: string;
 
-  @Column()
+  @Column({ nullable: true })
   district: string;
 
   @Column({ nullable: true })
@@ -152,6 +169,22 @@ export class Listing {
 
   @Column({ default: false })
   isPinned: boolean;
+
+  // Shopee Affiliate Product Info (Admin only)
+  @Column({ nullable: true })
+  shopeeProductUrl: string;
+
+  @Column({ nullable: true })
+  shopeeProductName: string;
+
+  @Column({ type: 'decimal', precision: 14, scale: 0, nullable: true })
+  shopeePrice: number;
+
+  @Column({ nullable: true })
+  shopeeImageUrl: string;
+
+  @Column({ nullable: true })
+  shopeeCommissionRate: string; // e.g. "5%" or "12.5%"
 
   // Relations
   @ManyToOne(() => User, { onDelete: 'CASCADE' })

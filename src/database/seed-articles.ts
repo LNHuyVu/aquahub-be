@@ -66,12 +66,21 @@ export async function seedArticlesDatabase(dataSource: DataSource) {
   console.log('🌱 Generating 200 fish care handbook articles...');
   const articlesRaw = generate50Articles();
 
-  console.log(`🚀 Inserting ${articlesRaw.length} handbook articles into PostgreSQL...`);
+  console.log(`🚀 Upserting ${articlesRaw.length} handbook articles into PostgreSQL...`);
   let insertedCount = 0;
+  let updatedCount = 0;
 
   for (const art of articlesRaw) {
-    const existing = await articleRepo.findOne({ where: { slug: art.slug } });
-    if (!existing) {
+    let existing = await articleRepo.findOne({ where: { slug: art.slug } });
+    if (existing) {
+      existing.title = art.title;
+      existing.excerpt = art.excerpt;
+      existing.content = art.content;
+      existing.coverImage = art.coverImage;
+      existing.tags = art.tags;
+      await articleRepo.save(existing);
+      updatedCount++;
+    } else {
       await articleRepo.save(
         articleRepo.create({
           title: art.title,
@@ -90,7 +99,7 @@ export async function seedArticlesDatabase(dataSource: DataSource) {
     }
   }
 
-  console.log(`✅ ${insertedCount} new handbook articles inserted into database!`);
+  console.log(`✅ ${insertedCount} new articles inserted, ${updatedCount} articles updated in database!`);
 }
 
 async function run() {

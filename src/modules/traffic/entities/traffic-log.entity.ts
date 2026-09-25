@@ -16,25 +16,25 @@ export class TrafficLog {
   path: string;
 
   @Column({ nullable: true })
-  method: string;
+  method?: string;
 
   @Column({ nullable: true })
-  ip: string;
+  ip?: string;
 
   @Column({ type: 'text', nullable: true })
-  userAgent: string;
+  userAgent?: string;
 
   @Column({ nullable: true })
-  device: string; // 'DESKTOP', 'MOBILE', 'TABLET'
+  device?: string; // 'DESKTOP', 'MOBILE', 'TABLET'
 
   @Column({ nullable: true })
-  browser: string;
+  browser?: string;
 
   @Column({ nullable: true })
-  referrer: string;
+  referrer?: string;
 
   @Column({ nullable: true })
-  userId: string;
+  userId?: string;
 
   @CreateDateColumn()
   @Index()

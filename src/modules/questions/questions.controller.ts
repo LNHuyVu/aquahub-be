@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Patch, Delete } from '@nestjs/common';
 import { QuestionsService } from './questions.service';
 import { CreateQuestionDto, CreateAnswerDto } from './dto/questions.dto';
 import { Public } from '../../common/decorators/public.decorator';
@@ -14,7 +14,7 @@ export class QuestionsController {
   @Get()
   async findAll(
     @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
+    @Query('limit') limit: number = 24,
     @Query('search') search?: string,
   ) {
     return this.questionsService.findAll(page, limit, search);
@@ -50,5 +50,14 @@ export class QuestionsController {
     @Param('answerId') answerId: string,
   ) {
     return this.questionsService.selectBestAnswer(userId, questionId, answerId);
+  }
+
+  @Delete(':id')
+  async deleteQuestion(
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: string,
+    @Param('id') id: string,
+  ) {
+    return this.questionsService.deleteQuestion(userId, userRole, id);
   }
 }

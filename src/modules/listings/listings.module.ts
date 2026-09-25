@@ -9,6 +9,7 @@ import {
   ListingLike,
   ListingReport,
 } from './entities/listing.entity';
+import { FishCategory } from '../fish/entities/fish.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import {
       ListingComment,
       ListingLike,
       ListingReport,
+      FishCategory,
     ]),
   ],
   controllers: [ListingsController],

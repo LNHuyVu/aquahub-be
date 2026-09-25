@@ -39,7 +39,7 @@ export class TrafficService {
       device,
       browser,
       referrer: reqData.referrer || 'Direct',
-      userId: reqData.userId || null,
+      userId: reqData.userId,
     });
 
     return this.trafficRepo.save(log);
@@ -140,7 +140,7 @@ export class TrafficService {
     if (count > 20) return; // already seeded
 
     const now = new Date();
-    const logs = [];
+    const logs: TrafficLog[] = [];
 
     for (let i = 0; i < 250; i++) {
       const path = samplePaths[Math.floor(Math.random() * samplePaths.length)];

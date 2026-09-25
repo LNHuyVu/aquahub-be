@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdateProfileDto } from '../auth/dto/auth.dto';
 
+import { applyFuzzySearch } from '../../common/utils/fuzzy-search';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -48,9 +50,7 @@ export class UsersService {
     const query = this.userRepository.createQueryBuilder('user');
 
     if (search) {
-      query.where('user.username ILIKE :search OR user.email ILIKE :search OR user.displayName ILIKE :search', {
-        search: `%${search}%`,
-      });
+      applyFuzzySearch(query, search, ['user.username', 'user.email', 'user.displayName']);
     }
 
     query

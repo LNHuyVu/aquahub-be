@@ -39,6 +39,44 @@ export class CreateTankDto {
   description?: string;
 }
 
+export class UpdateTankDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  coverImage?: string;
+
+  @IsOptional()
+  @IsNumber()
+  length?: number;
+
+  @IsOptional()
+  @IsNumber()
+  width?: number;
+
+  @IsOptional()
+  @IsNumber()
+  height?: number;
+
+  @IsOptional()
+  @IsNumber()
+  ph?: number;
+
+  @IsOptional()
+  @IsNumber()
+  temperature?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isPublic?: boolean;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+}
+
 export class AddTankFishDto {
   @IsString()
   @IsNotEmpty({ message: 'Loại cá không được để trống' })

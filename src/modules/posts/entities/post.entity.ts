@@ -10,10 +10,40 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
+@Entity('post_categories')
+export class PostCategory {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  name: string;
+
+  @Column({ unique: true })
+  slug: string;
+
+  @Column({ nullable: true })
+  icon: string;
+
+  @Column({ nullable: true })
+  description: string;
+
+  @Column({ default: 0 })
+  order: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+}
+
 @Entity('posts')
 export class Post {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ nullable: true })
+  title: string;
+
+  @Column({ nullable: true, unique: true })
+  slug: string;
 
   @Column({ type: 'text' })
   content: string;
@@ -21,8 +51,12 @@ export class Post {
   @Column('simple-array', { nullable: true })
   images: string[];
 
-  @Column({ nullable: true, default: '🐟 Cá cảnh' })
-  category: string;
+  @Column({ nullable: true })
+  categoryId: string;
+
+  @ManyToOne(() => PostCategory, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'categoryId' })
+  category: PostCategory | any;
 
   @Column()
   authorId: string;
@@ -132,10 +166,21 @@ export enum ReportStatus {
   RESOLVED = 'RESOLVED',
 }
 
+export enum ReportTargetType {
+  POST = 'POST',
+  FISH = 'FISH',
+  ARTICLE = 'ARTICLE',
+  LISTING = 'LISTING',
+  COMMENT = 'COMMENT',
+}
+
 @Entity('reports')
 export class Report {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ type: 'varchar', default: ReportTargetType.POST })
+  targetType: string;
 
   @Column()
   reporterId: string;
@@ -146,6 +191,12 @@ export class Report {
 
   @Column({ nullable: true })
   postId: string;
+
+  @Column({ nullable: true })
+  fishId: string;
+
+  @Column({ nullable: true })
+  articleId: string;
 
   @Column({ nullable: true })
   commentId: string;
@@ -159,3 +210,4 @@ export class Report {
   @CreateDateColumn()
   createdAt: Date;
 }
+

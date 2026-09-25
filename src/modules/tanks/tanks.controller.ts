@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { TanksService } from './tanks.service';
-import { CreateTankDto, AddTankFishDto, CreateTankLogDto } from './dto/tanks.dto';
+import { CreateTankDto, UpdateTankDto, AddTankFishDto, CreateTankLogDto } from './dto/tanks.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -12,8 +12,11 @@ export class TanksController {
 
   @Public()
   @Get()
-  async getFeaturedTanks(@Query('limit') limit: number = 6) {
-    return this.tanksService.getFeaturedTanks(limit);
+  async getFeaturedTanks(
+    @Query('limit') limit: number = 20,
+    @Query('search') search?: string,
+  ) {
+    return this.tanksService.getFeaturedTanks(limit, search);
   }
 
   @Get('my')
@@ -51,5 +54,22 @@ export class TanksController {
     @Body() dto: CreateTankLogDto,
   ) {
     return this.tanksService.addLogToTank(userId, tankId, dto);
+  }
+
+  @Put(':id')
+  async updateTank(
+    @CurrentUser('id') userId: string,
+    @Param('id') tankId: string,
+    @Body() dto: UpdateTankDto,
+  ) {
+    return this.tanksService.updateTank(userId, tankId, dto);
+  }
+
+  @Delete(':id')
+  async deleteTank(
+    @CurrentUser('id') userId: string,
+    @Param('id') tankId: string,
+  ) {
+    return this.tanksService.deleteTank(userId, tankId);
   }
 }

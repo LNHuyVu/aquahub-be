@@ -7,7 +7,19 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 import { User } from '../modules/users/entities/user.entity';
 import { Role } from '../common/enums/role.enum';
-import { Post, Comment, Like } from '../modules/posts/entities/post.entity';
+import { Post, PostCategory, Comment, Like } from '../modules/posts/entities/post.entity';
+
+function slugify(text: string): string {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đĐ]/g, 'd')
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 import { Fish, FishCategory } from '../modules/fish/entities/fish.entity';
 import { Question, Answer } from '../modules/questions/entities/question.entity';
 import { Tank, TankFish, TankLog } from '../modules/tanks/entities/tank.entity';
@@ -160,6 +172,7 @@ const postTemplates = [
 export async function seed20UsersWithPosts(dataSource: DataSource) {
   const userRepo = dataSource.getRepository(User);
   const postRepo = dataSource.getRepository(Post);
+  const postCategoryRepo = dataSource.getRepository(PostCategory);
   const commentRepo = dataSource.getRepository(Comment);
 
   console.log('🔑 Hashing default password (123456)...');
@@ -196,17 +209,34 @@ export async function seed20UsersWithPosts(dataSource: DataSource) {
     const template = postTemplates[i];
     const author = createdUsers[i % createdUsers.length];
 
-    const post = await postRepo.save(
-      postRepo.create({
-        content: template.content,
-        images: [template.image],
-        category: template.category,
-        authorId: author.id,
-        likesCount: Math.floor(Math.random() * 45) + 5,
-        commentsCount: template.comments.length,
-        isPublished: true,
-      }),
-    );
+    const catSlug = slugify(template.category);
+    let postCat = await postCategoryRepo.findOne({ where: [{ name: template.category }, { slug: catSlug }] });
+    if (!postCat) {
+      postCat = await postCategoryRepo.save(
+        postCategoryRepo.create({
+          name: template.category,
+          slug: catSlug || `danh-muc-${i}`,
+          order: i + 1,
+        }),
+      );
+    }
+
+    const title = template.content.slice(0, 70);
+    const baseSlug = slugify(title) || 'bai-viet';
+    const slug = `${baseSlug}-${Date.now().toString().slice(-6)}-${i}`;
+
+    const postEntity = postRepo.create({
+      title,
+      slug,
+      content: template.content,
+      images: [template.image],
+      authorId: author.id,
+      categoryId: postCat.id,
+      likesCount: Math.floor(Math.random() * 45) + 5,
+      commentsCount: template.comments.length,
+      isPublished: true,
+    });
+    const post = await postRepo.save(postEntity);
     postCount++;
 
     // Add comments from other users

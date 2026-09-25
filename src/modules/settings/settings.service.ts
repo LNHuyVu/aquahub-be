@@ -1,14 +1,66 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Setting } from './entities/setting.entity';
+import { User } from '../users/entities/user.entity';
+import { Fish, FishCategory } from '../fish/entities/fish.entity';
+import { Article } from '../articles/entities/article.entity';
+import { ArticleCategory } from '../articles/entities/article-category.entity';
+import { Listing, ListingCategory } from '../listings/entities/listing.entity';
+import { Post } from '../posts/entities/post.entity';
+import { Question } from '../questions/entities/question.entity';
+import { Tank } from '../tanks/entities/tank.entity';
+import { Ad } from '../ads/entities/ad.entity';
 
 @Injectable()
 export class SettingsService {
   constructor(
     @InjectRepository(Setting)
     private readonly settingRepository: Repository<Setting>,
+    private readonly dataSource: DataSource,
   ) {}
+
+  async getAdminStats() {
+    const [
+      usersCount,
+      fishCount,
+      fishCategoriesCount,
+      articlesCount,
+      articleCategoriesCount,
+      listingsCount,
+      listingCategoriesCount,
+      postsCount,
+      questionsCount,
+      tanksCount,
+      adsCount,
+    ] = await Promise.all([
+      this.dataSource.getRepository(User).count().catch(() => 0),
+      this.dataSource.getRepository(Fish).count().catch(() => 0),
+      this.dataSource.getRepository(FishCategory).count().catch(() => 0),
+      this.dataSource.getRepository(Article).count().catch(() => 0),
+      this.dataSource.getRepository(ArticleCategory).count().catch(() => 0),
+      this.dataSource.getRepository(Listing).count().catch(() => 0),
+      this.dataSource.getRepository(ListingCategory).count().catch(() => 0),
+      this.dataSource.getRepository(Post).count().catch(() => 0),
+      this.dataSource.getRepository(Question).count().catch(() => 0),
+      this.dataSource.getRepository(Tank).count().catch(() => 0),
+      this.dataSource.getRepository(Ad).count().catch(() => 0),
+    ]);
+
+    return {
+      usersCount,
+      fishCount,
+      fishCategoriesCount,
+      articlesCount,
+      articleCategoriesCount,
+      listingsCount,
+      listingCategoriesCount,
+      postsCount,
+      questionsCount,
+      tanksCount,
+      adsCount,
+    };
+  }
 
   async getAll() {
     const settings = await this.settingRepository.find();

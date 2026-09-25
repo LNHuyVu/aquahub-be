@@ -72,7 +72,7 @@ export class AuthService {
       throw new UnauthorizedException('Tài khoản của bạn đã bị khóa');
     }
 
-    const tokens = await this.generateTokens(user);
+    const tokens = await this.generateTokens(user, dto.rememberMe);
     return {
       user: {
         id: user.id,
@@ -145,7 +145,7 @@ export class AuthService {
       });
     }
 
-    const tokens = await this.generateTokens(user);
+    const tokens = await this.generateTokens(user, dto.rememberMe);
     return {
       user: {
         id: user.id,
@@ -170,33 +170,44 @@ export class AuthService {
         throw new UnauthorizedException('Tài khoản không hợp lệ');
       }
 
-      return this.generateTokens(user);
+      const rememberMe = payload.rememberMe !== undefined ? payload.rememberMe : true;
+      return this.generateTokens(user, rememberMe);
     } catch {
       throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
     }
   }
 
-  private async generateTokens(user: any) {
+  private async generateTokens(user: any, rememberMe: boolean = true) {
     const payload = {
       sub: user.id,
       username: user.username,
       email: user.email,
       role: user.role,
+      rememberMe,
     };
+
+    const accessExpiresIn = rememberMe ? '30d' : '1d';
+    const refreshExpiresIn = rememberMe ? '365d' : '1d';
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_SECRET', 'shtplabs_super_secret_jwt_key_2026'),
-      expiresIn: '7d',
+      expiresIn: accessExpiresIn,
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET', 'shtplabs_super_secret_refresh_jwt_key_2026'),
-      expiresIn: '30d',
+      expiresIn: refreshExpiresIn,
     });
 
     return {
       accessToken,
       refreshToken,
     };
+  }
+
+  async verifyPassword(userId: string, passwordInput: string): Promise<boolean> {
+    const user = await this.usersService.findById(userId);
+    if (!user || !user.password) return false;
+    return bcrypt.compare(passwordInput, user.password);
   }
 }

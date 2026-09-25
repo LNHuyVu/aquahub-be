@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Tank, TankFish, TankLog } from './entities/tank.entity';
 import { CreateTankDto, AddTankFishDto, CreateTankLogDto } from './dto/tanks.dto';
 
+import { applyFuzzySearch } from '../../common/utils/fuzzy-search';
+
 @Injectable()
 export class TanksService {
   constructor(
@@ -15,13 +17,23 @@ export class TanksService {
     private readonly tankLogRepository: Repository<TankLog>,
   ) {}
 
-  async getFeaturedTanks(limit = 6) {
-    return this.tankRepository.find({
-      where: { isPublic: true },
-      relations: { owner: true },
-      order: { createdAt: 'DESC' },
-      take: limit,
-    });
+  async getFeaturedTanks(limit = 100, search?: string) {
+    const qb = this.tankRepository
+      .createQueryBuilder('tank')
+      .leftJoinAndSelect('tank.owner', 'owner')
+      .where('tank.isPublic = :isPublic', { isPublic: true });
+
+    if (search) {
+      applyFuzzySearch(qb, search, [
+        'tank.name',
+        'tank.description',
+        'tank.waterType',
+        'owner.displayName',
+        'owner.username',
+      ]);
+    }
+
+    return qb.orderBy('tank.createdAt', 'DESC').take(limit).getMany();
   }
 
   async getMyTanks(userId: string) {
@@ -98,5 +110,32 @@ export class TanksService {
     });
 
     return this.tankLogRepository.save(log);
+  }
+
+  async updateTank(userId: string, tankId: string, dto: any) {
+    const tank = await this.tankRepository.findOne({ where: { id: tankId } });
+    if (!tank) throw new NotFoundException('Hồ cá không tồn tại');
+    if (tank.ownerId !== userId) throw new ForbiddenException('Bạn không có quyền chỉnh sửa hồ cá này');
+
+    let volume = tank.volume;
+    const length = dto.length ?? tank.length;
+    const width = dto.width ?? tank.width;
+    const height = dto.height ?? tank.height;
+
+    if (length && width && height) {
+      volume = (length * width * height) / 1000;
+    }
+
+    Object.assign(tank, { ...dto, volume });
+    return this.tankRepository.save(tank);
+  }
+
+  async deleteTank(userId: string, tankId: string) {
+    const tank = await this.tankRepository.findOne({ where: { id: tankId } });
+    if (!tank) throw new NotFoundException('Hồ cá không tồn tại');
+    if (tank.ownerId !== userId) throw new ForbiddenException('Bạn không có quyền xóa hồ cá này');
+
+    await this.tankRepository.remove(tank);
+    return { success: true, message: 'Đã xóa hồ cá thành công' };
   }
 }

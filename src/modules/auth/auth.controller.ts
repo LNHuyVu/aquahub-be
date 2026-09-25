@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
 import { Public } from '../../common/decorators/public.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -33,5 +34,15 @@ export class AuthController {
   @Post('refresh')
   async refreshToken(@Body('refreshToken') refreshToken: string) {
     return this.authService.refreshToken(refreshToken);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('verify-password')
+  async verifyPassword(
+    @CurrentUser('id') userId: string,
+    @Body('password') passwordInput: string,
+  ) {
+    const isValid = await this.authService.verifyPassword(userId, passwordInput);
+    return { valid: isValid };
   }
 }

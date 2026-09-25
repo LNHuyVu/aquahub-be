@@ -3,12 +3,14 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
   Query,
   UseGuards,
 } from '@nestjs/common';
+
 import { ListingsService } from './listings.service';
 import {
   CreateListingDto,
@@ -174,8 +176,23 @@ export class ListingsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @Post('admin/create')
+  adminCreateListing(@CurrentUser('id') userId: string, @Body() dto: CreateListingDto) {
+    return this.listingsService.createListing(userId, dto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch('admin/:id')
+  adminUpdateListing(@Param('id') id: string, @Body() dto: UpdateListingDto) {
+    return this.listingsService.updateListing(id, '', dto, true);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Put(':id/toggle-pin')
   adminTogglePin(@Param('id') id: string) {
     return this.listingsService.adminTogglePin(id);
   }
 }
+

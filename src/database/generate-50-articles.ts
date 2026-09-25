@@ -242,31 +242,12 @@ export function generate50Articles(): ArticleSeedData[] {
 
     const coverImage = images[idx % images.length];
 
-    const content = `
-      <h2>1. Giới thiệu chung & Tầm quan trọng</h2>
-      <p>Trong thú chơi cá cảnh, tép cảnh và thủy sinh, việc nắm vững <strong>${t.title}</strong> đóng vai trò vô cùng quyết định đến sức khỏe của sinh vật cũng như vẻ đẹp tổng thể của bể cá. Người nuôi cần chú ý theo dõi các yếu tố môi trường nước, nhiệt độ và dinh dưỡng hàng ngày.</p>
-      
-      <h2>2. Chi tiết kỹ thuật & Các bước thực hiện</h2>
-      <p>Để đạt hiệu quả tối ưu cho vấn đề <em>${t.tag}</em>, các dân chơi cá kinh nghiệm khuyên bạn nên làm theo các bước chuẩn mực sau:</p>
-      <ul>
-        <li><strong>Bước 1:</strong> Kiểm tra chỉ số môi trường nước (độ pH từ 6.5 - 7.5, nhiệt độ ổn định 24°C - 28°C).</li>
-        <li><strong>Bước 2:</strong> Đảm bảo hệ thống lọc hoạt động liên tục 24/7 để duy trì hệ vi sinh xử lý khí độc NH3/NO2.</li>
-        <li><strong>Bước 3:</strong> Cung cấp chế độ dinh dưỡng cân bằng, chia nhỏ lượng thức ăn làm 2 lần/ngày, tránh để dư thừa.</li>
-        <li><strong>Bước 4:</strong> Vệ sinh nhẹ nhàng bông lọc và thay 20-30% nước sạch định kỳ hàng tuần.</li>
-      </ul>
-
-      <blockquote>
-        "Một hồ cá khỏe mạnh không chỉ phụ thuộc vào các thiết bị đắt tiền, mà cốt lõi nằm ở sự kiên nhẫn và quy trình chăm sóc tỉ mỉ từng ngày của người chơi."
-      </blockquote>
-
-      <h2>3. Lời khuyên từ chuyên gia AquaHub</h2>
-      <p>Hãy luôn chuẩn bị sẵn các loại thuốc cơ bản như muối hột, sưởi bể cá và men vi sinh chất lượng cao. Nếu phát hiện các dấu hiệu bất thường như cá bỏ ăn, bơi lờ đờ hoặc cọ mình vào phụ kiện, hãy kiểm tra ngay nguồn nước trước khi tiến hành can thiệp.</p>
-    `;
+    const content = buildDetailedArticleContent(t);
 
     return {
       title: t.title,
       slug,
-      excerpt: `Hướng dẫn chi tiết về ${t.title.toLowerCase()}. Tổng hợp bí quyết chăm sóc, xử lý môi trường và kinh nghiệm thực tế từ các chuyên gia AquaHub.`,
+      excerpt: buildExcerpt(t),
       content,
       coverImage,
       tags: [t.tag, 'Cẩm nang nuôi cá', 'AquaHub Guide'],
@@ -274,3 +255,244 @@ export function generate50Articles(): ArticleSeedData[] {
     };
   });
 }
+
+function buildExcerpt(t: { title: string; tag: string }): string {
+  return `Cẩm nang hướng dẫn chi tiết về ${t.title.toLowerCase()}. Tổng hợp thông số môi trường chuẩn, các bước chăm sóc và kinh nghiệm thực chiến từ các nghệ nhân AquaHub.`;
+}
+
+function buildDetailedArticleContent(t: { title: string; tag: string }): string {
+  const lowerTitle = t.title.toLowerCase();
+  const lowerTag = t.tag.toLowerCase();
+
+  // 1. Nhóm Bệnh cá & Trị bệnh
+  if (lowerTitle.includes('bệnh') || lowerTitle.includes('trị') || lowerTitle.includes('nấm') || lowerTitle.includes('cấp cứu') || lowerTag.includes('bệnh') || lowerTag.includes('trị')) {
+    return `
+      <h2>1. Tổng quan về hiện tượng và nguyên nhân gây bệnh</h2>
+      <p>Trong quá trình chăm sóc bể cá cảnh, <strong>${t.title}</strong> là một trong những vấn đề nguy hiểm đòi hỏi người chơi phải phát hiện và xử lý kịp thời. Nguyên nhân hàng đầu thường bắt nguồn từ suy giảm chất lượng nước, biến động nhiệt độ đột ngột hoặc môi trường chứa vi khuẩn/ký sinh trùng tích tụ lâu ngày.</p>
+      
+      <div style="background-color: #f8fafc; border-left: 4px solid #ef4444; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">
+        <strong style="color: #dc2626;">Dấu hiệu nhận biết sớm:</strong>
+        <ul style="margin-top: 8px; margin-bottom: 0;">
+          <li>Cá có biểu hiện bỏ ăn, bơi lờ đờ sát mặt nước hoặc ẩn nấp ở góc tối.</li>
+          <li>Thân thể có đốm trắng, vệt đỏ, xù vảy, thối đuôi hoặc lớp màng nhầy bám bất thường.</li>
+          <li>Cá hay cọ mình vào thân lũa, đá hoặc thành bể để gãi ngứa.</li>
+        </ul>
+      </div>
+
+      <h2>2. Thông số môi trường lý tưởng khi điều trị</h2>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px;">
+        <thead>
+          <tr style="background-color: #0b74e5; color: white;">
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Thông số</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Mức điều trị chuẩn</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Ghi chú chuyên môn</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Nhiệt độ nước</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>28°C - 30°C</strong></td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Sử dụng sưởi để ức chế sự phát triển của vi khuẩn/nấm.</td>
+          </tr>
+          <tr style="background-color: #f8fafc;">
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Nồng độ muối hột</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>1‰ - 3‰ (1-3g/lít)</strong></td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Giúp sát trùng nhẹ và giảm áp suất thẩm thấu cho cá.</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Thay nước định kỳ</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>20% - 30% mỗi ngày</strong></td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Hút sạch phân cặn và làm giảm mật độ mầm bệnh trong nước.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>3. Quy trình 4 bước xử lý dứt điểm</h2>
+      <ol style="line-height: 1.8;">
+        <li><strong>Bước 1 - Cách ly cá bệnh:</strong> Chuyển cá sang bể dưỡng (bể hospital) để tránh lây nhiễm cho các cá thể khỏe mạnh khác.</li>
+        <li><strong>Bước 2 - Điều chỉnh sưởi & sủi oxy:</strong> Bật cây sưởi ở nhiệt độ 29°C - 30°C và đánh sủi oxy thật mạnh vì nước nóng chứa ít oxy hơn.</li>
+        <li><strong>Bước 3 - Sử dụng thuốc chuyên dụng:</strong> Đánh thuốc theo đúng liều lượng chỉ định (Bio-Knock, Tetra Nhật, Muối hột hoặc Oxy già tùy theo loại bệnh).</li>
+        <li><strong>Bước 4 - Phục hồi hệ vi sinh:</strong> Sau 3-5 ngày điều trị khi cá đã khỏe lại, tiến hành lọc bằng than hoạt tính và bổ sung men vi sinh tươi ExtraBio/Bio-Clean.</li>
+      </ol>
+
+      <blockquote>
+        "Phòng bệnh luôn tốt hơn chữa bệnh. Việc duy trì hệ vi sinh ổn định và không cho cá ăn quá nhiều là chìa khóa giúp cá luôn có sức đề kháng cao nhất."
+      </blockquote>
+    `;
+  }
+
+  // 2. Nhóm Tép cảnh & Ốc
+  if (lowerTitle.includes('tép') || lowerTitle.includes('óc') || lowerTag.includes('tép') || lowerTag.includes('óc')) {
+    return `
+      <h2>1. Giới thiệu dòng tép/ốc và đặc tính sinh học</h2>
+      <p>Thú chơi tép cảnh và ốc cảnh đang trở thành xu hướng cực kỳ phổ biến nhờ màu sắc bắt mắt và khả năng dọn dẹp hệ sinh thái vô cùng tuyệt vời. <strong>${t.title}</strong> đòi hỏi người chơi hiểu rõ đặc tính độ cứng của nước cũng như khoáng chất để tép/ốc phát triển khỏe mạnh và sinh sản tốt.</p>
+
+      <h2>2. Bảng thông số nước chuẩn cho tép & ốc cảnh</h2>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px;">
+        <thead>
+          <tr style="background-color: #10b981; color: white;">
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Chỉ số nước</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Ngưỡng an toàn</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Tác dụng</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Độ pH</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>6.0 - 7.5</strong></td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Duy trì sự ổn định tế bào da vỏ.</td>
+          </tr>
+          <tr style="background-color: #f8fafc;">
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Độ cứng gH / kH</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>gH: 4 - 8 | kH: 1 - 4</strong></td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Cung cấp Ca/Mg giúp tép lột vỏ không bị hở cổ.</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Nhiệt độ tối ưu</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>22°C - 26°C</strong></td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Nhiệt độ mát mẻ giúp màu sắc tép lên căng nhất.</td>
+          </tr>
+          <tr style="background-color: #f8fafc;">
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Chỉ số TDS</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>120 - 180 ppm</strong></td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Đo lường hàm lượng tổng chất rắn hòa tan.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>3. Chế độ dinh dưỡng & Bí quyết lột vỏ an toàn</h2>
+      <ul>
+        <li><strong>Thức ăn chính:</strong> Cám tép chuyên dụng chứa tảo Spirulina, đạm thực vật và khoáng chất tổng hợp.</li>
+        <li><strong>Bổ sung lá cây:</strong> Lá dâu tằm luộc sơ, lá bàng khô giúp tạo màng biofilm tự nhiên cho tép con ăn liên tục.</li>
+        <li><strong>Châm khoáng định kỳ:</strong> Sử dụng khoáng nước Liquid GH+ khi thay nước RO để đảm bảo gH ổn định.</li>
+      </ul>
+
+      <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">
+        <strong style="color: #047857;">Mẹo nuôi thực chiến từ AquaHub:</strong>
+        <p style="margin-top: 6px; margin-bottom: 0;">Tuyệt đối không sử dụng hóa chất diệt muỗi, nước xịt phòng hoặc thuốc chứa Đồng (Copper) gần khu vực hồ tép vì Đồng là chất cực độc làm tép chết hàng loạt chỉ trong vài phút!</p>
+      </div>
+    `;
+  }
+
+  // 3. Nhóm Thủy sinh, Rêu & Cây trồng
+  if (lowerTitle.includes('thủy sinh') || lowerTitle.includes('cây') || lowerTitle.includes('rêu') || lowerTitle.includes('bố cục') || lowerTag.includes('thủy sinh') || lowerTag.includes('rêu')) {
+    return `
+      <h2>1. Tổng quan nghệ thuật & Phong cách setup</h2>
+      <p>Thiết lập một bể thủy sinh hoàn chỉnh không chỉ đơn thuần là trồng cây vào phân nền mà là sự kết hợp nghệ thuật giữa ánh sáng, dưỡng chất, dòng chảy và khí CO2. <strong>${t.title}</strong> sẽ mang tới không gian xanh mát và hệ sinh thái thu nhỏ sống động ngay trong căn phòng của bạn.</p>
+
+      <h2>2. Yếu tố cốt lõi giúp cây thủy sinh phát triển rực rỡ</h2>
+      <ol style="line-height: 1.8;">
+        <li><strong>Ánh sáng chuẩn quang hợp:</strong> Sử dụng đèn LED thủy sinh chuyên dụng (WRGB) mở từ 6 - 8 tiếng mỗi ngày (có thể chia làm 2 nhịp chiếu sáng để hạn chế rêu hại).</li>
+        <li><strong>Hệ thống CO2 hòa tan:</strong> Cung cấp CO2 liên tục với mật độ 1 - 3 giọt/giây giúp cây nhả oxy lấp lánh và lên màu đậm đà.</li>
+        <li><strong>Cốt nền & Đất nền:</strong> Sử dụng đất nền công nghiệp (Aqua Soil) kết hợp phân nước vi lượng (Fe, K) khi cây đã cắm rễ ổn định sau 2 tuần.</li>
+        <li><strong>Dòng chảy nhẹ nhàng:</strong> Giúp luân chuyển dinh dưỡng và CO2 tới từng kẽ lá mà không làm tróc gốc cây mới cắm.</li>
+      </ol>
+
+      <h2>3. Quy trình cắt tỉa & Chăm sóc định kỳ</h2>
+      <p>Sau 3-4 tuần setup, cây cắt cắm sẽ phát triển cao chạm mặt nước. Hãy dùng nhíp và kéo cong chuyên dụng để cắt tỉa ngang thân. Phần ngọn cắt ra có thể cắm lại xuống nền để nhân giống tạo thảm cây dày dặn hơn.</p>
+
+      <blockquote>
+        "Hồ thủy sinh đẹp nhất là hồ thủy sinh có sự cân bằng giữa Dinh dưỡng - Ánh sáng - CO2. Khi 3 yếu tố này đạt điểm cân bằng, rêu hại sẽ tự động biến mất."
+      </blockquote>
+    `;
+  }
+
+  // 4. Nhóm Nước, Hệ vi sinh & Thiết bị lọc
+  if (lowerTitle.includes('nước') || lowerTitle.includes('lọc') || lowerTitle.includes('cycle') || lowerTitle.includes('ph') || lowerTitle.includes('co2') || lowerTitle.includes('đèn') || lowerTag.includes('chất lượng nước') || lowerTag.includes('thiết bị')) {
+    return `
+      <h2>1. Nguyên lý vận hành và tầm quan trọng của hệ vi sinh</h2>
+      <p>Trái tim của bất kỳ hồ cá hay hồ thủy sinh nào chính là hệ thống lọc và chu trình Nitơ (Cycle). <strong>${t.title}</strong> hướng dẫn chi tiết cách thiết lập một môi trường nước trong vắt, sinh học ổn định giúp sinh vật sống lâu thọ.</p>
+
+      <h2>2. Sơ đồ chu trình Nitơ trong bể cá (Nitrogen Cycle)</h2>
+      <div style="background-color: #f1f5f9; padding: 16px; border-radius: 8px; margin: 16px 0; border: 1px solid #cbd5e1;">
+        <p style="margin: 0; font-weight: 600; color: #1e293b;">Quy trình chuyển hóa khí độc tự nhiên:</p>
+        <p style="margin-top: 8px; font-family: monospace; color: #0284c7;">
+          Phân cá & Thức ăn thừa ➔ Khí độc NH3/NH4+ ➔ (Vi khuẩn Nitrosomonas) ➔ Khí độc NO2- ➔ (Vi khuẩn Nitrobacter) ➔ Nitrate NO3- (Cây hấp thụ / Thay nước xả ra)
+        </p>
+      </div>
+
+      <h2>3. Đánh giá các loại vật liệu lọc phổ biến nhất hiện nay</h2>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px;">
+        <thead>
+          <tr style="background-color: #0284c7; color: white;">
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Vật liệu lọc</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Diện tích cư trú vi sinh</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Đánh giá thực tế</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Sứ lọc hoa mai / Sứ thanh</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Khá cao (~600 m²/lít)</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Giá rẻ, phù hợp lọc tràn, lọc vách.</td>
+          </tr>
+          <tr style="background-color: #f8fafc;">
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Đá nham thạch đỏ/đen</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Trung bình (~400 m²/lít)</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Bền bỉ, giặt rửa thoải mái không rã.</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Seachem Matrix / Substrat Pro</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Siêu cao (~700 - 800 m²/lít)</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">Lựa chọn cao cấp hàng đầu cho lọc thùng.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>4. Các bước duy trì nước hồ luôn trong như pha lê</h2>
+      <ul>
+        <li>Không thay quá 30% nước trong một lần để tránh làm vi sinh suy giảm đột ngột.</li>
+        <li>Chỉ giặt rửa bông lọc thô bằng nước hút ra từ chính bể cá, tuyệt đối không dùng nước máy chứa Clo giặt vật liệu lọc.</li>
+        <li>Bổ sung vi sinh định kỳ mỗi tuần 1 lần sau khi thay nước mới.</li>
+      </ul>
+    `;
+  }
+
+  // 5. Mặc định: Kỹ thuật nuôi dòng cá cụ thể (Betta, Guppy, Discus, Koi, Rồng, v.v.)
+  return `
+    <h2>1. Giới thiệu dòng cá và vẻ đẹp đặc trưng</h2>
+    <p>Chăm sóc cá cảnh là một niềm vui nghệ thuật mang lại sự thư thái tuyệt vời cho không gian sống. Bài viết <strong>${t.title}</strong> tổng hợp toàn bộ kỹ thuật chuẩn xác giúp bạn nuôi dưỡng đàn cá khỏe mạnh, lên màu chuẩn và có tuổi thọ cao.</p>
+
+    <h2>2. Bảng chỉ số môi trường & Chăm sóc cá chuẩn chuyên gia</h2>
+    <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px;">
+      <thead>
+        <tr style="background-color: #0b74e5; color: white;">
+          <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Hạng mục</th>
+          <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Thông số tối ưu</th>
+          <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left;">Hướng dẫn chi tiết</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #cbd5e1;">Nhiệt độ nước</td>
+          <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>25°C - 28°C</strong></td>
+          <td style="padding: 8px; border: 1px solid #cbd5e1;">Giữ nhiệt độ ổn định, tránh gió lùa đột ngột.</td>
+        </tr>
+        <tr style="background-color: #f8fafc;">
+          <td style="padding: 8px; border: 1px solid #cbd5e1;">Độ pH phù hợp</td>
+          <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>6.5 - 7.5</strong></td>
+          <td style="padding: 8px; border: 1px solid #cbd5e1;">Mức pH trung tính phù hợp cho đa số loài cá cảnh.</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #cbd5e1;">Chế độ khẩu phần ăn</td>
+          <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>1 - 2 lần / ngày</strong></td>
+          <td style="padding: 8px; border: 1px solid #cbd5e1;">Cho ăn vừa đủ trong 3 phút, hút bỏ thức ăn thừa.</td>
+        </tr>
+        <tr style="background-color: #f8fafc;">
+          <td style="padding: 8px; border: 1px solid #cbd5e1;">Tần suất thay nước</td>
+          <td style="padding: 8px; border: 1px solid #cbd5e1;"><strong>1 - 2 lần / tuần</strong></td>
+          <td style="padding: 8px; border: 1px solid #cbd5e1;">Thay 20% lượng nước và xịt khử Clo nước máy.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Bí quyết dinh dưỡng & Tăng cường sắc tố tự nhiên</h2>
+    <p>Để cá luôn sung mãn và vây vảy rực rỡ, việc kết hợp giữa thức ăn hạt giàu đạm (cám Inve, cám Thái) với thức ăn tươi sống đã qua xử lý sạch sẽ (Trùn chỉ, Artemia ấp tươi, Tim bò) là điều vô cùng quan trọng.</p>
+
+    <div style="background-color: #f0f9ff; border-left: 4px solid #0284c7; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">
+      <strong style="color: #0369a1;">Lời khuyên từ nghệ nhân AquaHub:</strong>
+      <p style="margin-top: 6px; margin-bottom: 0;">Khi mới mua cá về, hãy thả cả bịch cá nổi trên mặt nước bể 15-20 phút để cân bằng nhiệt độ, sau đó múc từng ít nước bể vào bịch rồi mới cẩn thận vớt cá ra thả vào bể. Việc này giúp loại bỏ 100% nguy cơ cá bị sốc nước đột ngột!</p>
+    </div>
+  `;
+}
+

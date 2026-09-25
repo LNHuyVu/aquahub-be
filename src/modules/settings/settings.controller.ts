@@ -17,6 +17,12 @@ export class SettingsController {
   }
 
   @Roles(Role.ADMIN)
+  @Get('admin-stats')
+  async getAdminStats() {
+    return this.settingsService.getAdminStats();
+  }
+
+  @Roles(Role.ADMIN)
   @Post()
   async updateAll(@Body() body: Record<string, string>) {
     return this.settingsService.updateAll(body);

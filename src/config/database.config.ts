@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from '../modules/users/entities/user.entity';
 import { Fish, FishCategory } from '../modules/fish/entities/fish.entity';
-import { Post, Comment, Like, Bookmark, Report } from '../modules/posts/entities/post.entity';
+import { Post, PostCategory, Comment, Like, Bookmark, Report } from '../modules/posts/entities/post.entity';
 import { Question, Answer } from '../modules/questions/entities/question.entity';
 import { Tank, TankFish, TankLog } from '../modules/tanks/entities/tank.entity';
 import { Article } from '../modules/articles/entities/article.entity';
@@ -18,6 +18,7 @@ import {
 } from '../modules/listings/entities/listing.entity';
 
 import { TrafficLog } from '../modules/traffic/entities/traffic-log.entity';
+import { Conversation, Message } from '../modules/messages/entities/message.entity';
 
 export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOptions => ({
   type: 'postgres',
@@ -31,6 +32,7 @@ export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOp
     Fish,
     FishCategory,
     Post,
+    PostCategory,
     Comment,
     Like,
     Bookmark,
@@ -50,7 +52,10 @@ export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOp
     ListingLike,
     ListingReport,
     TrafficLog,
+    Conversation,
+    Message,
   ],
   synchronize: true, // auto sync tables in development
   logging: false,
 });
+

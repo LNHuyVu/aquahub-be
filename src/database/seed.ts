@@ -24,7 +24,7 @@ export async function seedFishDatabase(dataSource: DataSource) {
   const categoriesMap: Record<string, FishCategory> = {};
 
   for (const catData of categoriesData) {
-    let cat = await categoryRepo.findOne({ where: { slug: catData.slug } });
+    let cat = await categoryRepo.findOne({ where: [{ slug: catData.slug }, { name: catData.name }] });
     if (!cat) {
       cat = await categoryRepo.save(categoryRepo.create(catData));
     }
